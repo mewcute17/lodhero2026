@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warcraft 3 Patch Notes</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: "Trebuchet MS", serif;
+  background: radial-gradient(circle at top, #1a1205, #000);
+  color: #f5e6c8;
+}
+header {
+  text-align: center;
+  padding: 25px;
+  background: linear-gradient(#3a2a10, #1a1205);
+  border-bottom: 2px solid #c8a96a;
+}
+h1 { margin: 0; color: #ffd700; }
+.container { max-width: 900px; margin: auto; padding: 20px; }
+.search { width: 100%; padding: 12px; border-radius: 8px; border: none; margin-bottom: 20px; }
+.timeline { border-left: 2px solid #c8a96a; padding-left: 20px; }
+.card { margin-bottom: 30px; position: relative; }
+.card::before { content: ""; width: 12px; height: 12px; background: gold; border-radius: 50%; position: absolute; left: -27px; top: 5px; }
+.patch { color: #ffd700; font-weight: bold; }
+.update-item { background: rgba(255,255,255,0.05); margin: 6px 0; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; }
+.buff { color: #4ade80; }
+.nerf { color: #f87171; }
+.notice { color: #94a3b8; font-size: 13px; margin-top: 10px; }
+</style>
+</head>
+
+<body>
+<header>
+  <h1>Warcraft 3 Patch Notes</h1>
+  <p>Live từ GitHub</p>
+</header>
+
+<div class="container">
+<input class="search" placeholder="🔍 Search unit..." oninput="render(this.value)">
+<div class="timeline" id="timeline"></div>
+<p class="notice">⚠️ Update được load từ file updates.json trên GitHub</p>
+</div>
+
+<script>
+// ⚠️ ĐỔI LINK NÀY THÀNH REPO CỦA BẠN
+const DATA_URL = "https://raw.githubusercontent.com/your-username/your-repo/main/updates.json";
+
+let updates = [];
+
+async function loadData() {
+  try {
+    const res = await fetch(DATA_URL);
+    updates = await res.json();
+    render();
+  } catch (e) {
+    document.getElementById("timeline").innerHTML = "❌ Không load được dữ liệu từ GitHub";
+  }
+}
+
+function isBuff(oldVal, newVal) {
+  return Number(newVal) > Number(oldVal);
+}
+
+function render(search = "") {
+  const el = document.getElementById("timeline");
+  el.innerHTML = "";
+
+  updates.slice().reverse().forEach(update => {
+    const filtered = update.changes.filter(c =>
+      c.name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    if (!filtered.length) return;
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    let html = `<div class='patch'>${update.version}</div>`;
+
+    filtered.forEach(c => {
+      const buff = isBuff(c.old, c.new);
+      html += `
+        <div class="update-item">
+          <span>${c.name}</span>
+          <span class="${buff ? "buff" : "nerf"}">
+            ${c.old} → ${c.new} ${buff ? "▲" : "▼"}
+          </span>
+        </div>
+      `;
+    });
+
+    div.innerHTML = html;
+    el.appendChild(div);
+  });
+}
+
+loadData();
+</script>
+</body>
+</html>
