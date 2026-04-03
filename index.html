@@ -1,103 +1,61 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Warcraft 3 Patch Notes</title>
-
-<style>
-body {
-  margin: 0;
-  font-family: "Trebuchet MS", serif;
-  background: radial-gradient(circle at top, #1a1205, #000);
-  color: #f5e6c8;
-}
-header {
-  text-align: center;
-  padding: 25px;
-  background: linear-gradient(#3a2a10, #1a1205);
-  border-bottom: 2px solid #c8a96a;
-}
-h1 { margin: 0; color: #ffd700; }
-.container { max-width: 900px; margin: auto; padding: 20px; }
-.search { width: 100%; padding: 12px; border-radius: 8px; border: none; margin-bottom: 20px; }
-.timeline { border-left: 2px solid #c8a96a; padding-left: 20px; }
-.card { margin-bottom: 30px; position: relative; }
-.card::before { content: ""; width: 12px; height: 12px; background: gold; border-radius: 50%; position: absolute; left: -27px; top: 5px; }
-.patch { color: #ffd700; font-weight: bold; }
-.update-item { background: rgba(255,255,255,0.05); margin: 6px 0; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; }
-.buff { color: #4ade80; }
-.nerf { color: #f87171; }
-.notice { color: #94a3b8; font-size: 13px; margin-top: 10px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Warcraft Balance Log — Search Patches</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
 </head>
-
 <body>
-<header>
-  <h1>Warcraft 3 Patch Notes</h1>
-  <p>Live từ GitHub</p>
-</header>
+  <div class="bg-aurora" aria-hidden="true"></div>
+  <header class="site-header">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">⚔</span>
+      <div>
+        <h1>Warcraft Balance Log</h1>
+        <p class="tagline">Search units, abilities, AI tuning &amp; drop tables — buffs, nerfs &amp; reworks in one place.</p>
+      </div>
+    </div>
+  </header>
 
-<div class="container">
-<input class="search" placeholder="🔍 Search unit..." oninput="render(this.value)">
-<div class="timeline" id="timeline"></div>
-<p class="notice">⚠️ Update được load từ file updates.json trên GitHub</p>
-</div>
+  <main class="main">
+    <section class="search-panel" aria-label="Search filters">
+      <div class="search-row">
+        <label class="sr-only" for="q">Search</label>
+        <input
+          type="search"
+          id="q"
+          class="search-input"
+          placeholder="Search name, keyword, or patch (e.g. frost, 2.0, creep)…"
+          autocomplete="off"
+        />
+        <button type="button" class="btn-clear" id="clear" title="Clear">Clear</button>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Category</span>
+        <div class="chips" id="category-chips" role="group" aria-label="Category"></div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Change</span>
+        <div class="chips" id="change-chips" role="group" aria-label="Change type"></div>
+      </div>
+      <p class="meta" id="result-count"></p>
+    </section>
 
-<script>
+    <section class="results" aria-live="polite" aria-atomic="false">
+      <ul class="card-list" id="results"></ul>
+      <p class="empty" id="empty" hidden>No entries match your filters.</p>
+    </section>
+  </main>
 
-const DATA_URL = "https://raw.githubusercontent.com/mewcute17/lodhero2026/refs/heads/main/updates.json";
+  <footer class="site-footer">
+    <p>Demo dataset for layout &amp; search — replace <code>js/data.js</code> with your patch notes or API feed.</p>
+  </footer>
 
-let updates = [];
-
-async function loadData() {
-  try {
-    const res = await fetch(DATA_URL);
-    updates = await res.json();
-    render();
-  } catch (e) {
-    document.getElementById("timeline").innerHTML = "❌ Không load được dữ liệu từ GitHub";
-  }
-}
-
-function isBuff(oldVal, newVal) {
-  return Number(newVal) > Number(oldVal);
-}
-
-function render(search = "") {
-  const el = document.getElementById("timeline");
-  el.innerHTML = "";
-
-  updates.slice().reverse().forEach(update => {
-    const filtered = update.changes.filter(c =>
-      c.name.toLowerCase().includes(search.toLowerCase())
-    );
-
-    if (!filtered.length) return;
-
-    const div = document.createElement("div");
-    div.className = "card";
-
-    let html = `<div class='patch'>${update.version}</div>`;
-
-    filtered.forEach(c => {
-      const buff = isBuff(c.old, c.new);
-      html += `
-        <div class="update-item">
-          <span>${c.name}</span>
-          <span class="${buff ? "buff" : "nerf"}">
-            ${c.old} → ${c.new} ${buff ? "▲" : "▼"}
-          </span>
-        </div>
-      `;
-    });
-
-    div.innerHTML = html;
-    el.appendChild(div);
-  });
-}
-
-loadData();
-</script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
